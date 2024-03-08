@@ -5,23 +5,15 @@
 #define ENCODER_0_B_PIN  23
 #define ENCODER_1_A_PIN  26
 //#define ENCODER_1_B_PIN Non-standard pin!
-// encoder count
-// 358.3 counts per revolution
-// 1.0047446274 degrees angular resolution
-// 6cm wheel diameter, 18cm robot diameter
-// 10.0530964915cm is full distance covered in a revolution
-// 0.028057763cm per count
-
-// 3.2cm wheel diameter, 18cm robot diameter
-// 18.8495559215cm is full distance covered in a revolution
-// 0.0526083057cm per count
 
 
 // Volatile Global variables used by Encoder ISR.
 volatile long count_e_right; // used by encoder to count the rotation
-volatile byte state_e_right; // right
-volatile long count_e_left; // left
-volatile byte state_e_left;
+volatile byte state_right;
+volatile long count_e_left;
+volatile byte state_left;
+
+
 
 // This ISR handles just Encoder 0
 // ISR to read the Encoder0 Channel A and B pins
@@ -45,58 +37,50 @@ ISR( INT6_vect ) {
   // 2 and 3 in the state variable (current state)
   // State: (bit3)  (bit2)  (bit1)   (bit0)
   // State:  new B   new A   old B   old A
-  state_e_right = state_e_right | ( e0_B  << 3 );
-  state_e_right = state_e_right | ( e0_A  << 2 );
+  state_right = state_right | ( e0_B  << 3 );
+  state_right = state_right | ( e0_A  << 2 );
 
   // Handle which transition we have registered.
   // Complete this if statement as necessary.
   // Refer to the labsheet.
-  if ( state_e_right == 1 ) {
-//    count_e_right = count_e_right + 1; // top line makes forward count sum negatively
-    count_e_right = count_e_right - 1; // bottom line makes forward count sum positively
+  if ( state_right == 1 ) {
 
-  } else if ( state_e_right == 2 ) {
+    count_e_right += 1;
 
-//    count_e_right = count_e_right - 1; 
-    count_e_right = count_e_right + 1; 
+  } else if ( state_right == 2 ) {
 
-  } else if ( state_e_right == 4 ) {
+    count_e_right -= 1;
 
-//    count_e_right = count_e_right - 1;
-    count_e_right = count_e_right + 1;
+  } else if ( state_right == 4 ) {
 
-  } else if ( state_e_right == 7 ) {
+    count_e_right -= 1;
 
-//    count_e_right = count_e_right + 1;
-    count_e_right = count_e_right - 1;
+  } else if ( state_right == 7 ) {
 
-  } else if ( state_e_right == 8 ) {
+    count_e_right += 1;
 
-//    count_e_right = count_e_right + 1;
-    count_e_right = count_e_right - 1;
+  } else if ( state_right == 8 ) {
 
-  } else if ( state_e_right == 11 ) {
+    count_e_right += 1;
 
-//    count_e_right = count_e_right - 1;
-    count_e_right = count_e_right + 1;
+  } else if ( state_right == 11 ) {
 
-  } else if ( state_e_right == 13 ) {
+    count_e_right -= 1;
 
-//    count_e_right = count_e_right - 1;
-    count_e_right = count_e_right + 1;
+  } else if ( state_right == 13 ) {
 
-  } else if ( state_e_right == 14 ) {
+    count_e_right -= 1;
 
-//    count_e_right = count_e_right + 1;
-    count_e_right = count_e_right - 1;
+  } else if ( state_right == 14 ) {
 
-  } // Continue this if statement as necessary.
+    count_e_right += 1;
+  }
 
   // Shift the current readings (bits 3 and 2) down
   // into position 1 and 0 (to become prior readings)
   // This bumps bits 1 and 0 off to the right, "deleting"
   // them for the next ISR call.
-  state_e_right = state_e_right >> 2;
+  state_right = state_right >> 2;
 
 }
 
@@ -132,68 +116,51 @@ ISR( PCINT0_vect ) {
   //
   // State :  (bit3)  (bit2)  (bit1)  (bit0)
   // State :  New A,  New B,  Old A,  Old B.
-  state_e_left = state_e_left | ( e1_B  << 3 );
-  state_e_left = state_e_left | ( e1_A  << 2 );
+  state_left = state_left | ( e1_B  << 3 );
+  state_left = state_left | ( e1_A  << 2 );
 
 
   // Handle which transition we have registered.
   // Complete this if statement as necessary.
   // Refer to the labsheet.
-  //    if( state_e_left == 0 ) {
-  //
-  //    } else if( state_e_left == 1 ) {
-  //
-  //    } else if( state_e_left == 2 ) {
-  //
-  //    } // Continue this if statement as necessary.
-  if ( state_e_left == 1 ) {
-    
-//    count_e_left = count_e_left + 1; // top line makes forward count sum negatively
-    count_e_left = count_e_left - 1; // bottom line makes forward count sum positively
+  if ( state_left == 1 ) {
 
-  } else if ( state_e_left == 2 ) {
+    count_e_left += 1;
 
-//    count_e_left = count_e_left - 1; 
-    count_e_left = count_e_left + 1; 
+  } else if ( state_left == 2 ) {
 
-  } else if ( state_e_left == 4 ) {
+    count_e_left -= 1;
 
-//    count_e_left = count_e_left - 1;
-    count_e_left = count_e_left + 1;
+  } else if ( state_left == 4 ) {
 
-  } else if ( state_e_left == 7 ) {
+    count_e_left -= 1;
 
-//    count_e_left = count_e_left + 1;
-    count_e_left = count_e_left - 1;
+  } else if ( state_left == 7 ) {
 
-  } else if ( state_e_left == 8 ) {
+    count_e_left += 1;
 
-//    count_e_left = count_e_left + 1;
-    count_e_left = count_e_left - 1;
+  } else if ( state_left == 8 ) {
 
-  } else if ( state_e_left == 11 ) {
+    count_e_left += 1;
 
-//    count_e_left = count_e_left - 1;
-    count_e_left = count_e_left + 1;
+  } else if ( state_left == 11 ) {
 
-  } else if ( state_e_left == 13 ) {
+    count_e_left -= 1;
 
-//    count_e_left = count_e_left - 1;
-    count_e_left = count_e_left + 1;
+  } else if ( state_left == 13 ) {
 
-  } else if ( state_e_left == 14 ) {
+    count_e_left -= 1;
 
-//    count_e_left = count_e_left + 1;
-    count_e_left = count_e_left - 1;
+  } else if ( state_left == 14 ) {
 
-  } // Continue this if statement as necessary.
-
+    count_e_left += 1;
+  }
 
   // Shift the current readings (bits 3 and 2) down
   // into position 1 and 0 (to become prior readings)
   // This bumps bits 1 and 0 off to the right, "deleting"
   // them for the next ISR call.
-  state_e_left = state_e_left >> 2;
+  state_left = state_left >> 2;
 }
 
 
@@ -204,7 +171,7 @@ ISR( PCINT0_vect ) {
    This is really convenient!  It means we don't
    have to check the encoder manually.
 */
-void setupEncoder0()
+void setupEncoderRight()
 {
   count_e_right = 0;
 
@@ -213,7 +180,7 @@ void setupEncoder0()
   pinMode( ENCODER_0_B_PIN, INPUT );
 
   // initialise the recorded state of e0 encoder.
-  state_e_right = 0;
+  state_right = 0;
 
   // Get initial state of encoder pins A + B
   boolean e0_A = digitalRead( ENCODER_0_A_PIN );
@@ -222,8 +189,8 @@ void setupEncoder0()
 
   // Shift values into correct place in state.
   // Bits 1 and 0  are prior states.
-  state_e_right = state_e_right | ( e0_B << 1 );
-  state_e_right = state_e_right | ( e0_A << 0 );
+  state_right = state_right | ( e0_B << 1 );
+  state_right = state_right | ( e0_A << 0 );
 
 
   // Now to set up PE6 as an external interupt (INT6), which means it can
@@ -255,7 +222,7 @@ void setupEncoder0()
 
 }
 
-void setupEncoder1()
+void setupEncoderLeft()
 {
 
   count_e_left = 0;
@@ -287,7 +254,7 @@ void setupEncoder1()
   digitalWrite( ENCODER_1_A_PIN, HIGH ); // Encoder 1 xor
 
   // initialise the recorded state of e1 encoder.
-  state_e_left = 0;
+  state_left = 0;
 
   // Get initial state of encoder.
   boolean e1_B = PINE & (1 << PINE2);
@@ -303,8 +270,8 @@ void setupEncoder1()
 
   // Shift values into correct place in state.
   // Bits 1 and 0  are prior states.
-  state_e_left = state_e_left | ( e1_B << 1 );
-  state_e_left = state_e_left | ( e1_A << 0 );
+  state_left = state_left | ( e1_B << 1 );
+  state_left = state_left | ( e1_A << 0 );
 
   // Enable pin-change interrupt on A8 (PB4) for encoder0, and disable other
   // pin-change interrupts.
